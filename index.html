@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PayDoc Analyzer — Анализатор документов по оплате труда</title>
+<meta name="description" content="Автоматизированный анализ и сверка документов по расчёту заработной платы с помощью AI">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="#home" class="nav-logo" data-page="home">
+      <span class="logo-icon">📋</span>
+      <span class="logo-text">PayDoc Analyzer</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Меню">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="#home" class="nav-link" data-page="home">Главная</a>
+      <a href="#analyzer" class="nav-link" data-page="analyzer">Анализатор</a>
+      <a href="#instructions" class="nav-link" data-page="instructions">Инструкции</a>
+      <a href="#about" class="nav-link" data-page="about">О программе</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ HOME PAGE ============ -->
+<section id="page-home" class="page">
+  <div class="hero">
+    <div class="hero-content">
+      <h1>PayDoc Analyzer</h1>
+      <p class="hero-subtitle">Анализатор документов по оплате труда на базе искусственного интеллекта</p>
+      <p class="hero-description">
+        Снизьте время сверки документов по зарплате с 3–5 часов до 30 секунд.
+        Автоматическая проверка полноты, выявление расхождений и готовые рекомендации.
+      </p>
+      <a href="#analyzer" class="btn btn-primary btn-lg" data-page="analyzer">Начать анализ →</a>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><span class="stat-number">30 сек</span><span class="stat-label">время анализа</span></div>
+    <div class="stat"><span class="stat-number">95%</span><span class="stat-label">исключено ошибок</span></div>
+    <div class="stat"><span class="stat-number">100%</span><span class="stat-label">охват проверок</span></div>
+    <div class="stat"><span class="stat-number">3-5 ч</span><span class="stat-label">экономия в месяц</span></div>
+  </div>
+
+  <div class="section-container">
+    <h2 class="section-title">Возможности приложения</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📁</div>
+        <h3>Гибкая загрузка</h3>
+        <p>TXT, CSV файлы, drag & drop или вставка текста из буфера обмена. До 10 файлов одновременно.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Проверка полноты</h3>
+        <p>Автоматическая проверка наличия табелей, служебных записок, согласий и других документов.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚖️</div>
+        <h3>Сверка данных</h3>
+        <p>Выявление расхождений между табелем, записками и согласиями работников.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Сводная таблица</h3>
+        <p>Автоматическое формирование сводки по каждому сотруднику: часы, доплаты, переработка.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💡</div>
+        <h3>Рекомендации</h3>
+        <p>Конкретные шаги по устранению проблем и статус готовности к расчёту.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Приватность</h3>
+        <p>Обработка происходит в браузере, документы не сохраняются на сервере.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-banner">
+    <h2>Готовы проверить документы?</h2>
+    <p>Загрузите табель, служебные записки и согласия — получите результат за секунды.</p>
+    <a href="#analyzer" class="btn btn-primary btn-lg" data-page="analyzer">Перейти к анализатору</a>
+  </div>
+</section>
+
+<!-- ============ ANALYZER PAGE ============ -->
+<section id="page-analyzer" class="page">
+  <div class="section-container">
+    <h1 class="page-title">Анализатор документов</h1>
+
+    <div id="apiKeyBanner" class="alert alert-info">
+      <span class="alert-icon">🔑</span>
+      <div class="alert-body">
+        <strong>Требуется ключ Anthropic API.</strong>
+        <p>Ключ хранится только в вашем браузере (localStorage) и отправляется напрямую в Anthropic — мы его не видим и не сохраняем на сервере.</p>
+        <div class="api-key-row">
+          <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
+          <button class="btn btn-secondary" id="saveApiKeyBtn">Сохранить</button>
+        </div>
+        <label class="checkbox-label">
+          <input type="checkbox" id="rememberKey" checked> Запомнить ключ в этом браузере
+        </label>
+      </div>
+    </div>
+
+    <div class="analyzer-grid">
+      <!-- LEFT: Upload panel -->
+      <div class="panel upload-panel">
+        <h2 class="panel-title">Загрузка документов</h2>
+
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">📤</div>
+          <p class="dropzone-text">Перетащите файлы сюда или нажмите для выбора</p>
+          <p class="dropzone-hint">TXT, CSV · до 10 МБ · до 10 файлов</p>
+          <input type="file" id="fileInput" accept=".txt,.csv" multiple hidden>
+        </div>
+
+        <div class="paste-area">
+          <button class="btn btn-link" id="togglePasteBtn">+ Вставить текст из буфера обмена</button>
+          <div id="pasteBox" class="paste-box hidden">
+            <textarea id="pasteTextarea" rows="6" placeholder="Вставьте текст документа сюда..."></textarea>
+            <div class="paste-actions">
+              <input type="text" id="pasteFileName" placeholder="Название документа (напр. Табель июль)">
+              <button class="btn btn-secondary btn-sm" id="addPastedBtn">Добавить как документ</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="file-list-header">
+          <span>Загруженные файлы</span>
+          <span id="fileCount" class="file-count">0 / 10</span>
+        </div>
+        <ul class="file-list" id="fileList">
+          <li class="file-list-empty">Пока нет загруженных файлов</li>
+        </ul>
+
+        <button class="btn btn-primary btn-block" id="analyzeBtn" disabled>Начать анализ</button>
+
+        <div class="info-block">
+          <strong>Какие документы загружать:</strong>
+          <ul>
+            <li>Табель учёта рабочего времени</li>
+            <li>Служебные записки (выходные, аварийные, выезды)</li>
+            <li>Согласия работников</li>
+            <li>Доп.: акты, распоряжения, штатное расписание</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Results panel -->
+      <div class="panel results-panel">
+        <div class="results-header">
+          <h2 class="panel-title">Результаты анализа</h2>
+          <div class="results-actions hidden" id="resultsActions">
+            <button class="btn btn-secondary btn-sm" id="copyResultsBtn">📋 Копировать</button>
+            <button class="btn btn-secondary btn-sm" id="downloadResultsBtn">⬇ Скачать</button>
+          </div>
+        </div>
+        <div class="results-body" id="resultsBody">
+          <div class="results-placeholder">
+            <div class="placeholder-icon">📄</div>
+            <p>Загрузите документы и нажмите «Начать анализ», чтобы увидеть результат здесь.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="alertContainer"></div>
+  </div>
+</section>
+
+<!-- ============ INSTRUCTIONS PAGE ============ -->
+<section id="page-instructions" class="page">
+  <div class="section-container">
+    <h1 class="page-title">Инструкции</h1>
+
+    <div class="instructions-steps">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>Подготовка документов</h3>
+          <p>Соберите документы по зарплате за период: табель учёта рабочего времени, служебные записки о работе в выходные/праздничные/аварийные дни, согласия работников. Документы должны быть в текстовом виде (TXT, CSV) — можно скопировать текст из Word или Excel.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>Загрузка файлов</h3>
+          <p>Перейдите на страницу «Анализатор». Перетащите файлы в зону загрузки, выберите через диалог или вставьте текст вручную. Можно загрузить до 10 файлов общим размером до 10 МБ каждый.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>Процесс анализа</h3>
+          <p>Нажмите «Начать анализ». Приложение прочитает файлы в браузере, сформирует запрос и отправит его в Claude API. Анализ занимает от 5 до 30 секунд в зависимости от объёма документов.</p>
+        </div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h3>Получение результатов</h3>
+          <p>Результат появится в правой панели: сводная таблица по сотрудникам, проверка полноты документов, список проблем и рекомендации, статус готовности к расчёту. Результат можно скопировать или скачать в TXT.</p>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Пример формата документов</h2>
+    <div class="example-grid">
+      <div class="example-card">
+        <h4>Табель учёта рабочего времени</h4>
+        <pre>=== Табель учета рабочего времени ===
+Период: июль 2024
+Смена: 08:00-17:00 (8 часов)
+
+Иванов Иван Иванович
+01.07 - Рабочий день (8 часов)
+06.07 - Выходной (согласие: да)
+Итого: 40 часов рабочих, 16 часов выходных</pre>
+      </div>
+      <div class="example-card">
+        <h4>Служебная записка</h4>
+        <pre>=== Служебная записка ===
+О выполнении работ в выходной день
+
+ФИ: Иванов И.И.
+Дата: 06.07.2024
+Время: 08:00-17:00 (8 часов)
+Вид работ: Аварийные
+Согласие: получено</pre>
+      </div>
+      <div class="example-card">
+        <h4>Согласие работника</h4>
+        <pre>=== Согласие работника ===
+ФИ: Иванов Иван Иванович
+Должность: Электромонтер
+
+Даю согласие на:
+- Работу в выходные: 06.07, 13.07 (16 часов)
+- Доплату: 100% от оклада
+
+Подпись: ___________
+Дата: 01.07.2024</pre>
+      </div>
+    </div>
+
+    <div class="tips-box">
+      <h3>💡 Советы по использованию</h3>
+      <ul>
+        <li>Указывайте ФИО одинаково во всех документах — это упрощает сверку.</li>
+        <li>Загружайте документы за один и тот же период одновременно.</li>
+        <li>Если приложение сообщает о недостающих документах — запросите их перед расчётом зарплаты.</li>
+        <li>Проверяйте статус «Готовность к расчёту» перед тем, как приступать к начислениям.</li>
+        <li>Для больших объёмов разбивайте документы по сотрудникам или по типам.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT PAGE ============ -->
+<section id="page-about" class="page">
+  <div class="section-container">
+    <h1 class="page-title">О программе</h1>
+
+    <p class="about-lead">
+      <strong>PayDoc Analyzer</strong> — веб-приложение для менеджеров по оплате труда и HR-специалистов,
+      которое автоматизирует анализ, проверку полноты и сверку документов по расчёту заработной платы
+      с помощью искусственного интеллекта (Claude API от Anthropic).
+    </p>
+
+    <h2 class="section-title">Основные возможности</h2>
+    <ul class="check-list">
+      <li>Проверка полноты документов (табель, записки, согласия)</li>
+      <li>Сверка данных между документами и выявление расхождений</li>
+      <li>Формирование сводной таблицы по сотрудникам</li>
+      <li>Обнаружение противоречий в датах и часах</li>
+      <li>Готовые рекомендации по устранению проблем</li>
+      <li>Экспорт результатов в TXT</li>
+    </ul>
+
+    <h2 class="section-title">Технологический стек</h2>
+    <div class="tech-grid">
+      <div class="tech-item">HTML5</div>
+      <div class="tech-item">CSS3</div>
+      <div class="tech-item">JavaScript (Vanilla)</div>
+      <div class="tech-item">Claude API (claude-sonnet-4-6)</div>
+    </div>
+
+    <h2 class="section-title">FAQ</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>Мои данные безопасны?</summary>
+        <p>Да. Документы обрабатываются в вашем браузере и отправляются только в Claude API через HTTPS. Приложение не сохраняет ваши данные на сервере — сервера с базой данных вообще нет.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Какие документы можно загружать?</summary>
+        <p>TXT и CSV файлы, либо текст, скопированный из Word/Excel и вставленный вручную. Документы должны быть текстовыми — сканы и PDF без OCR не поддерживаются.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Сколько это стоит?</summary>
+        <p>Сам сайт бесплатен. Вы используете собственный ключ Anthropic API, поэтому платите напрямую Anthropic по их тарифам — обычно это доли цента за один анализ.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Работает ли это без интернета?</summary>
+        <p>Нет, для анализа нужен интернет — запрос отправляется в Claude API.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Где взять API-ключ?</summary>
+        <p>Зарегистрируйтесь на console.anthropic.com, создайте ключ в разделе API Keys и вставьте его на странице «Анализатор».</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <p>PayDoc Analyzer · v1.0 · Работает полностью в браузере</p>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>
